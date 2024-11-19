@@ -15,11 +15,27 @@ const GridComponent = () => {
         const grid = new Grid(gNode.current, {
             columns: [
                 { width: 250, id: "name", header: [{ text: "Name" }] },
-                { autoWidth: true, id: "age", header: [{ text: "Age" }] }
+                { autoWidth: true, id: "age", type:"number", header: [{ text: "Age"}] },
+                {
+                    id: "delete", width: 50, header: [{ text: "", align: "center" }],
+                    htmlEnable: true,
+                    align: "center",
+                    editable: false,
+                    template: function () {
+                        return "<i class='dxi dxi-delete remove-button'>"
+                    }
+                }  
             ],
             editable: true,
             selection: "complex",
-            keyNavigation: true
+            keyNavigation: true,
+            eventHandlers: {
+                onclick: {
+                    "remove-button": function (e, data) {
+                        grid.data.remove(data.row.id);
+                    }
+                }
+            }
         });
         grid.data.load("http://127.0.0.1:3000/api/users/")
 
@@ -29,20 +45,19 @@ const GridComponent = () => {
                 {
                     "id": "add",
                     "type": "button",
-                    "value": "add record",
+                    "value": "new record",
                     "color": "secondary",
+                    "icon": "dxi dxi-plus"
                 },
                 {
-                    "id": "remove",
-                    "type": "button",
-                    "value": "remove record",
-                    "color": "secondary",
+                    "type": "spacer"
                 },
                 {
                     "id": "save",
                     "type": "button",
-                    "value": "save data",
+                    "value": "save changes",
                     "view": "link",
+                    "icon": "dxi dxi-content-save"
                 }
             ]
         });
@@ -53,10 +68,6 @@ const GridComponent = () => {
                     break;
                 case "add":
                     grid.data.add({})
-                    break;
-                case "remove":
-                    let cell = grid.selection.getCell()
-                    if (cell) grid.data.remove(cell.row.id)
                     break;
             }
         })
