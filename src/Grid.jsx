@@ -1,4 +1,4 @@
-import { Grid, Toolbar } from '@dhx/trial-suite';
+import { Grid, Toolbar, Window, Form } from '@dhx/trial-suite';
 import '@dhx/trial-suite/codebase/suite.min.css';
 import { useEffect, useRef, useState } from "react";
 
@@ -6,16 +6,19 @@ import { useEffect, useRef, useState } from "react";
 const GridComponent = () => {
     const gNode = useRef(null);
     let [grid, setGrid] = useState(null);
-    
+
     const tNode = useRef(null);
     let [toolbar, setToolbar] = useState(null);
+
+    let [win, setWin] = useState(null);
+    let [form, setForm] = useState(null);
 
     useEffect(() => {
 
         const grid = new Grid(gNode.current, {
             columns: [
                 { width: 250, id: "name", header: [{ text: "Name" }] },
-                { autoWidth: true, id: "age", type:"number", header: [{ text: "Age"}] },
+                { autoWidth: true, id: "age", type: "number", header: [{ text: "Age" }] },
                 {
                     id: "delete", width: 50, header: [{ text: "", align: "center" }],
                     htmlEnable: true,
@@ -24,7 +27,7 @@ const GridComponent = () => {
                     template: function () {
                         return "<i class='dxi dxi-delete remove-button'>"
                     }
-                }  
+                }
             ],
             editable: true,
             selection: "complex",
@@ -67,17 +70,80 @@ const GridComponent = () => {
                     grid.data.save("http://127.0.0.1:3000/api/users/")
                     break;
                 case "add":
-                    grid.data.add({})
+                    // grid.data.add({})
+                    win.show()
                     break;
             }
         })
 
+        const win = new Window(
+            {
+                closable: false,
+                modal: false,
+                width: 450,
+                height: 350
+            }
+        )
+
+        const form = new Form(null, {
+            rows: [
+                {
+                    type: "input",
+                    id: "name",
+                    label: "Name"
+                },
+                {
+                    type: "input",
+                    id: "age",
+                    label: "Age",
+                    inputType: "number"
+                },
+                {
+                    cols: [
+                        {
+                            type: "button",
+                            value: "add a Row",
+                            id: "add",
+                            padding: "0 20px 0 0"
+                        },
+                        {
+                            type: "button",
+                            value: "Cancel",
+                            id: "cancel"
+                        }
+                    ]
+                }
+            ]
+        })
+        form.events.on("click", (id) => {
+            switch (id) {
+                case "add":
+                    grid.data.add({
+                        "name": form.getItem("name").getValue(),
+                        "age": form.getItem("age").getValue()
+                    });
+                    form.clear();
+                    win.hide();
+                    break;
+                case "cancel":
+                    form.clear();
+                    win.hide();
+                    break;
+            }
+        })
+        win.attach(form)
+
         setToolbar(toolbar);
         setGrid(grid);
+        setWin(win);
+        setForm(form);
+
 
         return () => {
             grid.destructor();
             toolbar.destructor();
+            form.destructor();
+            win.destructor();
         }
     }, []);
 

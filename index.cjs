@@ -1,7 +1,7 @@
 const concurrently = require('concurrently');
 
 concurrently([
-  "node src/data.cjs",
+  "node src/backend/data.cjs",
   "vite"
 ], {
   prefix: 'name',
